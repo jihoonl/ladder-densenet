@@ -6,6 +6,7 @@ from shutil import copyfile
 from tqdm import trange
 
 import numpy as np
+from absl import flags
 import tensorflow as tf
 from tensorflow.python.client import timeline
 
@@ -13,11 +14,8 @@ import utils
 
 np.set_printoptions(linewidth=250)
 
-tf.app.flags.DEFINE_string('config_path', '', """Path to experiment config.""")
-FLAGS = tf.app.flags.FLAGS
-
-utils.import_module('config', FLAGS.config_path)
-print(FLAGS.config_path)
+flags.DEFINE_string('config_path', '', """Path to experiment config.""")
+FLAGS = flags.FLAGS
 
 
 def train(model):
@@ -69,7 +67,7 @@ def train(model):
 
     sess.run(tf.global_variables_initializer())
     if len(FLAGS.resume_path) > 0:
-      print(f'\nRestoring params from: {FLAGS.resume_path}\n')
+      print('\nRestoring params from: {FLAGS.resume_path}\n')
       #print(tf.train.latest_checkpoint(FLAGS.resume_path))
       #assert tf.gfile.Exists(FLAGS.resume_path)
       resnet_restore = tf.train.Saver(vars_to_restore)
@@ -188,6 +186,9 @@ def train(model):
 
 
 def main(argv=None):  # pylint: disable=unused-argument
+  utils.import_module('config', FLAGS.config_path)
+  print(FLAGS.config_path)
+
   model = utils.import_module('model', FLAGS.model_path)
 
   if tf.gfile.Exists(FLAGS.train_dir):
